@@ -1,0 +1,39 @@
+services:
+  chroma:
+    image: chromadb/chroma:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma-data:/chroma/chroma
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - CHROMA_URL=http://chroma:8000
+      - CHROMA_COLLECTION_NAME=${CHROMA_COLLECTION_NAME:-rag_documents}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-gemini-embedding-001}
+      - CHAT_MODEL=${CHAT_MODEL:-gemini-2.5-flash}
+      - CHUNK_SIZE=${CHUNK_SIZE:-1000}
+      - CHUNK_OVERLAP=${CHUNK_OVERLAP:-150}
+      - TOP_K_RESULTS=${TOP_K_RESULTS:-4}
+      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-15}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:5173}
+    depends_on:
+      - chroma
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  chroma-data:
