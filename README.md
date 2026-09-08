@@ -70,36 +70,50 @@ rag-doc-qa/
 - A Google Gemini API key (free tier available at aistudio.google.com/apikey)
 - Docker and Docker Compose (for containerized deployment)
 
-## Local Development
+## Local Development (without Docker)
 
-### 1. Start Chroma
+Requires Node.js 18+ and Python 3.9+ (Python is only used to run Chroma).
+
+### 1. Configure environment files
 
 ```bash
-docker run -p 8000:8000 chromadb/chroma:latest
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+# add your GOOGLE_API_KEY to backend/.env
 ```
 
-### 2. Backend
+### 2. Install Chroma (Python package)
 
 ```bash
-cd backend
-cp .env.example .env
-# add your GOOGLE_API_KEY to .env
-npm install --legacy-peer-deps
-npm run dev
+pip install chromadb
 ```
 
-The API server starts on `http://localhost:5000`.
+### 3. Install all Node dependencies (root, backend, frontend)
 
-### 3. Frontend
+From the project root:
 
 ```bash
-cd frontend
-cp .env.example .env
 npm install
+npm run install:all
+```
+
+### 4. Run everything with a single command
+
+```bash
 npm run dev
 ```
 
-The client starts on `http://localhost:5173` and proxies `/api` requests to the backend.
+This starts Chroma (port 8000), the backend (port 5000), and the frontend (port 5173) together in one terminal, each with a labeled, color-coded log prefix. Press `Ctrl+C` once to stop all three.
+
+Individual pieces can still be run on their own if needed:
+
+```bash
+npm run chroma
+npm run backend
+npm run frontend
+```
+
+The app is available at `http://localhost:5173`.
 
 ## Running with Docker Compose
 
